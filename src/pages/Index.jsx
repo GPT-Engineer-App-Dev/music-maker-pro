@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Container, VStack, Text, Button, Select, Box, HStack, Input } from "@chakra-ui/react";
-import { FaPlay, FaStop, FaRecordVinyl } from "react-icons/fa";
+import { Container, VStack, Text, Button, Select, Box, HStack, Input, Progress } from "@chakra-ui/react";
+import { FaPlay, FaStop, FaRecordVinyl, FaMusic } from "react-icons/fa";
 
 const instruments = ["Piano", "Guitar", "Drums", "Violin"];
 const notes = ["C", "D", "E", "F", "G", "A", "B"];
@@ -11,6 +11,7 @@ const Index = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordedNotes, setRecordedNotes] = useState([]);
   const [currentNote, setCurrentNote] = useState("");
+  const [playbackProgress, setPlaybackProgress] = useState(0);
 
   const handleInstrumentChange = (event) => {
     setSelectedInstrument(event.target.value);
@@ -51,6 +52,36 @@ const Index = () => {
     }
   }, [currentNote]);
 
+  useEffect(() => {
+    if (isPlaying && recordedNotes.length > 0) {
+      const interval = setInterval(() => {
+        setPlaybackProgress((prev) => {
+          if (prev >= recordedNotes.length) {
+            clearInterval(interval);
+            setIsPlaying(false);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 500); // Adjust the interval as needed
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying, recordedNotes]);
+
+  const VirtualTracks = ({ notes, progress }) => (
+    <Box width="100%" mt={4}>
+      <Text fontSize="lg" mb={2}>Virtual Tracks:</Text>
+      <HStack spacing={2}>
+        {notes.map((note, index) => (
+          <Box key={index} width="40px" height="40px" bg={index < progress ? "blue.500" : "gray.300"} display="flex" alignItems="center" justifyContent="center">
+            <FaMusic color="white" />
+          </Box>
+        ))}
+      </HStack>
+      <Progress value={(progress / notes.length) * 100} size="xs" colorScheme="blue" mt={2} />
+    </Box>
+  );
+
   return (
     <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
       <VStack spacing={4}>
@@ -85,6 +116,9 @@ const Index = () => {
             <Text fontSize="lg">Recorded Notes:</Text>
             <Input value={recordedNotes.join(", ")} isReadOnly />
           </Box>
+        )}
+        {recordedNotes.length > 0 && (
+          <VirtualTracks notes={recordedNotes} progress={playbackProgress} />
         )}
       </VStack>
     </Container>
