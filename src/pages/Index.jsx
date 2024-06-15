@@ -1,17 +1,48 @@
-// Update this page (the content is just a fallback if you fail and example)
-// Use chakra-ui
-import { Container, Text, VStack } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { Container, VStack, Text, Button, Select, Box } from "@chakra-ui/react";
+import { FaPlay, FaStop } from "react-icons/fa";
 
-// Example of using react-icons
-// import { FaRocket } from "react-icons/fa";
-// <IconButton aria-label="Add" icon={<FaRocket />} size="lg" />; // IconButton would also have to be imported from chakra
+const instruments = ["Piano", "Guitar", "Drums", "Violin"];
 
 const Index = () => {
+  const [selectedInstrument, setSelectedInstrument] = useState(instruments[0]);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleInstrumentChange = (event) => {
+    setSelectedInstrument(event.target.value);
+  };
+
+  const handlePlay = () => {
+    setIsPlaying(true);
+    // Logic to play the selected instrument
+    console.log(`Playing ${selectedInstrument}`);
+  };
+
+  const handleStop = () => {
+    setIsPlaying(false);
+    // Logic to stop playing
+    console.log(`Stopped playing ${selectedInstrument}`);
+  };
+
   return (
     <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
       <VStack spacing={4}>
-        <Text fontSize="2xl">Your Blank Canvas</Text>
-        <Text>Chat with the agent to start making edits.</Text>
+        <Text fontSize="2xl">Music Maker</Text>
+        <Select value={selectedInstrument} onChange={handleInstrumentChange}>
+          {instruments.map((instrument) => (
+            <option key={instrument} value={instrument}>
+              {instrument}
+            </option>
+          ))}
+        </Select>
+        <Box>
+          <Button leftIcon={<FaPlay />} colorScheme="teal" onClick={handlePlay} isDisabled={isPlaying}>
+            Play
+          </Button>
+          <Button leftIcon={<FaStop />} colorScheme="red" onClick={handleStop} isDisabled={!isPlaying} ml={4}>
+            Stop
+          </Button>
+        </Box>
       </VStack>
     </Container>
   );
