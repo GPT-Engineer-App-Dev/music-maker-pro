@@ -1,12 +1,16 @@
-import React, { useState } from "react";
-import { Container, VStack, Text, Button, Select, Box } from "@chakra-ui/react";
-import { FaPlay, FaStop } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { Container, VStack, Text, Button, Select, Box, HStack, Input } from "@chakra-ui/react";
+import { FaPlay, FaStop, FaRecordVinyl } from "react-icons/fa";
 
 const instruments = ["Piano", "Guitar", "Drums", "Violin"];
+const notes = ["C", "D", "E", "F", "G", "A", "B"];
 
 const Index = () => {
   const [selectedInstrument, setSelectedInstrument] = useState(instruments[0]);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordedNotes, setRecordedNotes] = useState([]);
+  const [currentNote, setCurrentNote] = useState("");
 
   const handleInstrumentChange = (event) => {
     setSelectedInstrument(event.target.value);
@@ -23,6 +27,29 @@ const Index = () => {
     // Logic to stop playing
     console.log(`Stopped playing ${selectedInstrument}`);
   };
+
+  const handleRecord = () => {
+    setIsRecording(!isRecording);
+    if (!isRecording) {
+      setRecordedNotes([]);
+    }
+    console.log(isRecording ? "Stopped recording" : "Started recording");
+  };
+
+  const handleNotePlay = (note) => {
+    setCurrentNote(note);
+    if (isRecording) {
+      setRecordedNotes((prevNotes) => [...prevNotes, note]);
+    }
+    console.log(`Playing note: ${note}`);
+  };
+
+  useEffect(() => {
+    if (currentNote) {
+      const timer = setTimeout(() => setCurrentNote(""), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [currentNote]);
 
   return (
     <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
@@ -42,7 +69,23 @@ const Index = () => {
           <Button leftIcon={<FaStop />} colorScheme="red" onClick={handleStop} isDisabled={!isPlaying} ml={4}>
             Stop
           </Button>
+          <Button leftIcon={<FaRecordVinyl />} colorScheme="yellow" onClick={handleRecord} ml={4}>
+            {isRecording ? "Stop Recording" : "Record"}
+          </Button>
         </Box>
+        <HStack spacing={2}>
+          {notes.map((note) => (
+            <Button key={note} onClick={() => handleNotePlay(note)} colorScheme={currentNote === note ? "blue" : "gray"}>
+              {note}
+            </Button>
+          ))}
+        </HStack>
+        {recordedNotes.length > 0 && (
+          <Box mt={4}>
+            <Text fontSize="lg">Recorded Notes:</Text>
+            <Input value={recordedNotes.join(", ")} isReadOnly />
+          </Box>
+        )}
       </VStack>
     </Container>
   );
